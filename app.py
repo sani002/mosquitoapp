@@ -58,21 +58,31 @@ def preprocess_image(image):
     # Run YOLO detection and get the list of results
     results = yolo.predict(source=image, conf=0.25, save_crop=False)
 
+    if not results:
+        # No objects detected, handle this case
+        st.error("No objects detected in the image.")
+        return None
+
     # Access the first result in the list
     first_result = results[0]
 
-    # Load the original image using Pillow
-    original_image_pil = image
-    original_image_np = np.array(original_image_pil)
+    if not first_result.boxes:
+        # No bounding boxes detected, use the entire image
+        st.warning("No bounding boxes detected. Using the entire image.")
+        resized_image = image.resize((224, 224))
+    else:
+        # Load the original image using Pillow
+        original_image_pil = image
+        original_image_np = np.array(original_image_pil)
 
-    # Access the bounding box coordinates
-    x_min, y_min, x_max, y_max = first_result.boxes[0].xyxy[0].tolist()
+        # Access the bounding box coordinates
+        x_min, y_min, x_max, y_max = first_result.boxes[0].xyxy[0].tolist()
 
-    # Crop the image using NumPy slicing
-    cropped_image_np = original_image_np[int(y_min):int(y_max), int(x_min):int(x_max)]
+        # Crop the image using NumPy slicing
+        cropped_image_np = original_image_np[int(y_min):int(y_max), int(x_min):int(x_max)]
 
-    # Resize the cropped image to 224x224
-    resized_image = Image.fromarray(cropped_image_np).resize((224, 224))
+        # Resize the cropped image to 224x224
+        resized_image = Image.fromarray(cropped_image_np).resize((224, 224))
 
     # Convert the resized image to a numpy array
     resized_image_array = np.array(resized_image)
@@ -81,6 +91,7 @@ def preprocess_image(image):
     resized_image_array = np.expand_dims(resized_image_array, axis=0)
 
     return resized_image_array
+
 
 # Function to make predictions
 def predict_yolo(image_path):
