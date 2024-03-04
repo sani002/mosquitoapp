@@ -36,7 +36,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 # Create YOLO instance with your model
-yolo = YOLO(model='yolov5s.pt')
+yolo = YOLO(model='yolov5su.pt')
 
 # Load the pre-trained model
 model = tf.keras.models.load_model('MobileNET.h5')
